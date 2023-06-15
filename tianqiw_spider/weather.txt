@@ -1,0 +1,12 @@
+month	low	hight	air_low	air_best
+5      15℃    26℃    134        25     
+month	low	hight	air_low	air_best
+6      14℃    22℃    0          0      
+month	low	hight	air_low	air_best
+3      3℃     16℃    338        24     
+month	low	hight	air_low	air_best
+4      9℃     19℃    484        30     
+month	low	hight	air_low	air_best
+1      -7℃    3℃     211        0      
+month	low	hight	air_low	air_best
+2      -3℃    6℃     199        12     

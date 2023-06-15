@@ -1,44 +1,118 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.by import By
-from bs4 import BeautifulSoup
+import time
+
 import requests
+from bs4 import BeautifulSoup
+import csv
 
-browser = webdriver.Chrome()
-chrome_options = Options()
-user_agent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/111.0.0.0 Safari/537.36"
-chrome_options.add_argument(user_agent)
+# 设置cookies
+cookies = {
+    'Ecp_ClientId': '1230530163301458123',
+    'knsLeftGroupSelectItem': '1%3B2%3B',
+    'Ecp_ClientIp': '114.246.64.142',
+    'Ecp_IpLoginFail': '230614114.246.64.142',
+    'ASP.NET_SessionId': 'mzv0yx4v3sckbwcgbqxjkdaq',
+    'CurrSortField': '%e7%9b%b8%e5%85%b3%e5%ba%a6%2frelevant%2c(%e5%8f%91%e8%a1%a8%e6%97%b6%e9%97%b4%2c%27time%27)+desc',
+    'CurrSortFieldType': 'desc',
+    'dblang': 'ch',
+    'SID_kns_new': 'kns25128007',
+    'SID_kns8': '25123164',
+}
 
+# 设置headers
+headers = {
+    'Accept': 'text/html, */*; q=0.01',
+    'Accept-Language': 'zh-CN,zh;q=0.9,en;q=0.8',
+    'Connection': 'keep-alive',
+    'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8',
+    # 'Cookie': 'Ecp_ClientId=1230530163301458123; knsLeftGroupSelectItem=1%3B2%3B; Ecp_ClientIp=114.246.64.142; Ecp_IpLoginFail=230614114.246.64.142; ASP.NET_SessionId=mzv0yx4v3sckbwcgbqxjkdaq; CurrSortField=%e7%9b%b8%e5%85%b3%e5%ba%a6%2frelevant%2c(%e5%8f%91%e8%a1%a8%e6%97%b6%e9%97%b4%2c%27time%27)+desc; CurrSortFieldType=desc; dblang=ch; SID_kns_new=kns25128007; SID_kns8=25123164',
+    'Origin': 'https://kns.cnki.net',
+    'Referer': 'https://kns.cnki.net/kns8/defaultresult/index',
+    'Sec-Fetch-Dest': 'empty',
+    'Sec-Fetch-Mode': 'cors',
+    'Sec-Fetch-Site': 'same-origin',
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/114.0.0.0 Safari/537.36',
+    'X-Requested-With': 'XMLHttpRequest',
+    'sec-ch-ua': '"Not.A/Brand";v="8", "Chromium";v="114", "Google Chrome";v="114"',
+    'sec-ch-ua-mobile': '?0',
+    'sec-ch-ua-platform': '"Windows"',
+}
+# 创建一个空列表，用于存储数据
+data_list = []
 
-def parse_index():
-    wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'fz14')))
-    soup = BeautifulSoup(browser.page_source, 'lxml')
-    items = soup.select('tr')
-    print(items)
-    for item in items:
-        try:
-            name = item.select_one('.fz14').text
-            link = item.select_one('.fz14')['href']
-            author = item.select_one('.author a').text
-            source = item.select_one('.source a').text
-            date = item.select_one('.date').text
-            data = item.select_one('.data').text
-            download = item.select_one('.operat a')['href']
-            response = requests.get(link, headers=headers)
-            print(response.text)
-        except:
-            continue
+# 遍历页面范围
+for page in range(1, 51):
+    # 构造POST请求的参数
+    data = {
+        'IsSearch': 'false',
+        'QueryJson': '{"Platform":"","DBCode":"CFLS","KuaKuCode":"CJFQ,CDMD,CIPD,CCND,CISD,SNAD,BDZK,CCJD,CCVD,CJFN","QNode":{"QGroup":[{"Key":"Subject","Title":"","Logic":1,"Items":[{"Title":"主题","Name":"SU","Value":"碳排放","Operate":"%=","BlurType":""}],"ChildItems":[]}]},"CodeLang":"ch"}',
+        'SearchSql': '0645419CC2F0B23BC604FFC82ADF67C6E920108EDAD48468E8156BA693E89F481391D6F5096D7FFF3585B29E8209A884EFDF8EF1B43B4C7232E120D4832CCC8979F171B4C268EE675FFB969E7C6AF23B4B63CE6436EE93F3973DCB2E4950C92CBCE188BEB6A4E9E17C3978AE8787ED6BB56445D70910E6E32D9A03F3928F9AD8AADE2A90A8F00E2B29BD6E5A0BE025E88D8E778EC97D42EF1CF47C35B8A9D5473493D11B406E77A4FF28F5B34B8028FE85F57606D7A3FED75B27901EEF587583EBD4B63AC0E07735BE77F216B50090DEE5ABB766456B996D37EB8BDACA3A67E8126F111CF9D15B351A094210DB6B4638A21065F03B6F0B73BB4625BBECE66F8197909739D8FB4EB756DEF71864177DFA3CB468CFA6E8ABF7924234DED6B0DFD49D9269CBA4A2BF4075D517A61D094225D70C1B4C137DB9614758A5E097376F5F3E55A7063A4B7E437436D13FF3CC8FB435E131FFCD16FC30DD997098B4FC997D995E767E2712175BC05B960D3FEB5CAF12A13BD1CE3530AD72FC4DB93206996E216BC5DC294960A0CA05E986848E1E64FFC5A52BFCB41A97840A708E397F11EFF261E08F3A34094061AE8E8F819AF6A17A9E2176C3893C6DD3E3C06864C91989BDEF9790A38FAF2524B17743B30EBA4ADD550BF985F9C3097A608C697283CE37F8CB78BDC9EAA4874C3485E6F931B016EC41BFBC0EF91B2AD7E1B424E1DFB8FC8771DEA2458C5A7A4C9BF0192C101FD8EDDEE1BACB44C3E478361EF0D1B70FAD56BCF6870A6044D3A226611B9C1A43C6F9F7C021C98E0D5F778D72C87183F026071A730B8BB4FABF9F68FEC783AB1E6E79218B5D87FD1BB541817FB4F3C21DC849A803CB8A620A2EE00475BAF2CE6556638B7A949B446F39A1076DA15764A777BA6239447CB91F4CF513325366E167D268DDB75F288B5C13415CE62F5C431181C044A28CA502FF14439E5C6F63D419CB6DE1360DB01593FE765459299E442EE24917C199AB5178F38461F8C4EBBC95344C5F2AB60F379813A87E2E3AFE3021198B8222CEAB870D9A353786079961184D63977917C7DF8FE6AFBBC795A832BDD454D6E3CD22C3FF7A58808923DD6F464C12A9A88FBFD0C71458AB0E4C1D566315181A9578ECE93670E5CAF13CF2553F68E64726C131F4A48B42A9E7F09EFEBA51D1FDA6BA0ECA0B02B951ECC04548F1D4D08DB69D0EFDCE6793537BB8E59DC442631A9CDBA13878D7493AADA0CD868C1C1C3A6A6FA17C4109205A83F9C0C43E0D2551D0A8592EA99D20D4B78B4EEEE2D53A543701F620C7D6FF46E800B0CEF9B3D23ACD62C7CBEA25FC8BD74D5A0E5C86B9CF3FCACBDBE585AFF85F9689CBF5BCBD267C580361D5B93AA9BD5A1BB6122BB87C04AE227211FE675A4650814F2285261E5641683D65E0454E2597F6025BB4AA1A044D7B97F57394EA5EC878B80FC0A82F12E2D3D9E1BCB062A7ABB290F02116BDED95761A67CE2FDDE42BDDDF34F22E49A0406D724FEBC86B93F80BB52A8D34B8D2B24288ECBC3F90CCB1EF36085E77F1E2AE0AB411FE60A033E704A21469EA5CE4BB8AF6B1C1F1C5F1F084472D57F458CC39F0B2FE583D0795159E9E38BD1102F5D96DB0F828B66F41A702BB0AE59E40CF53BE7F6342EF208434CFFABF845AFD771B288D484BB79952159E6EA27658A6B6230557AF16E86C4AFDF973DBD5A3A2B979AD9037441409D22A954DC50CBCEA8EA5AC500C4BC8282DCE2626BD2B2CB4B1E33B2E1F92533F7F04C48D061907DBCE3E21FF0A77F09C1AE33E769962CD1EDE6B688590D569409EE9EEC4DF1074DCC97C43B0EDAF1C38B5B2784ABC803D9B3B4FC35F46CB1E275E7F83036FC6AFF2E624D4D2E6AE1C2D4CE3FF219FA90A935957E0DE1A386E4AAB5C9F9D1CECA909F5698BFA86C57B6A73D3C0F9FDB94128B7BB9FDD19D57E4C2C2F4127A1F127A96ABF248B26D8B6EF12A1EA97D064564D33D46E5CA71F53FA121A7E5C91ED2B08BE64A0E3D22BE26FC251C0BF4CF21674DE19AF410E3EDFBD9A4BBEA6C709A1E42B5C17E1EE7AA33EFB0F375BF0858D49210A71662313FA5B8E04E508A5E9425D49C3C5D12CB8DCADBF8A148BFA042BBB0218AAC403AAB9CECC45FD33CEC6797FC984BF91FF638AF6E1F09546F595CFC779D2D867282C63B78DC6A6ED3C1C3887462C84AC07C756C5A8D8A8B2EFD39C28A68D47091A3312461BC20085636F4B41F22D5B46861F3E557777CDCFDFE6CAB8ABECFECA3634D779C0F21185772C426BE383BD26E1715DAB5EC4AE4CAC877ED6899CBCB31546F9C6144399C7C0257BBCCBE0EBD2E90EA901840211FCBB1655CB66FD9C51E90432B273CC4CFF3F8DBEB24CDB0ED6017FE68A7F3E9156E1BA276526DE9599A66921F0E2C3ED466FDE0076DCDA6745F29D28E406BEE5FFB0D4C5FB5D72029BAE56BC22496567FF64341F89469703987DD9D700C08346782F57BA62479812820C862D3D5C604C5C26A76F1A7EC503EB4892BAEB25BB44E783FFB3F1B2F5BECB16A5B48F4D769C3DD5713D2B00AEF4870248A1D561623C9418C285CEE86E1C8DF4A73ED729D7789577456281B4F4D1EE3447E6F8391341BB8F15CF9712E73DBE149164B95748F35D6A4CB4492B8D082AB372E96FC29D1578B41D85F0B7A04EFCBE928642D5D2825F978805C43062C3DF3F0915B33F58A8D82BCC523F3C36B9BAEB9226A39549408AFD3119A8B39B8887038107EB5A623D59186BFFF562E624E1BC25A0C8AA6DD298AEC09B06802A77DFD11799D29506307693DAB2962B98EF9F25E785619D05BDE7073474E187D59D41F6A2E06CC292AD406C2991D9C5E58812A1431B46AB634D548433B1E437D745A013EF5950818CC2A2860B352C191AF91E8EC70E40150B9E106CD756180F6EC6B7879CEC00BDF0A5622C79C0B09F9754E0D8B7512CC9FF7D7681F03171E591432E3F71F0D539429AD597319C59F6E77C16880F2B419FF5864D47BAFEA78B35E882DD882E4D84BF41940176A97D158F7D338D54B1FCB4C201DCA1C43A32AA0F3848089787217B4BD599C66A',
+        'PageName': 'defaultresult',
+        'HandlerId': '0',
+        'DBCode': 'CFLS',
+        'KuaKuCodes': 'CJFQ,CDMD,CIPD,CCND,CISD,SNAD,BDZK,CCJD,CCVD,CJFN',
+        'CurPage': f'{page}',
+        'RecordsCntPerPage': '20',
+        'CurDisplayMode': 'listmode',
+        'CurrSortField': '',
+        'CurrSortFieldType': 'desc',
+        'IsSortSearch': 'false',
+        'IsSentenceSearch': 'false',
+        'Subject': '',
+    }
 
+    response = requests.post('https://kns.cnki.net/kns8/Brief/GetGridTableHtml', cookies=cookies, headers=headers,
+                             data=data)
+    print(response.status_code)
+    # 发送POST请求获取响应
+    response = requests.post('https://kns.cnki.net/kns8/Brief/GetGridTableHtml', cookies=cookies, headers=headers,
+                             data=data)
+    print(response.status_code)
 
-if __name__ == '__main__':
-    browser.get('https://www.cnki.net/')
-    wait = WebDriverWait(browser, 10)
+    # 解析响应内容
+    soup = BeautifulSoup(response.text, 'lxml')
+    for item in soup.select('.result-table-list tr'):
+        # 解析每个结果项的数据
+        author = []
+        name_match = item.select_one('.name a')
+        if name_match:
+            name = name_match.get_text().strip()
+        else:
+            name = ''
+        author_match = item.select('.author a')
+        if author_match:
+            for i in author_match:
+                author.append(i.get_text().strip())
+        else:
+            author = ''
+        source_match = item.select_one('.source a')
+        if source_match:
+            source = source_match.get_text().strip()
+        else:
+            source = ''
+        date_match = item.select_one('.date')
+        if date_match:
+            date = date_match.get_text().strip()
+        else:
+            date = ''
+        data_match = item.select_one('.data')
+        if data_match:
+            data = data_match.get_text().strip()
+        else:
+            data = ''
 
-    input = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'search-input')))
-    submit = wait.until(EC.presence_of_element_located((By.CLASS_NAME, 'search-btn')))
+        # 将解析得到的数据存入数据列表
+        data_list.append([name, author, source, date, data])
+        print(name, author, source, date, data)
 
-    input.send_keys('Hadoop')
-    submit.click()
-    parse_index()
+    # 暂停1.5秒，以避免请求过于频繁
+    time.sleep(1.5)
+
+# 将数据列表写入CSV文件
+csv_file = 'output.csv'
+with open(csv_file, 'w', newline='', encoding='utf-8') as file:
+    writer = csv.writer(file)
+    writer.writerow(['Name', 'Author', 'Source', 'Date', 'Data'])
+    writer.writerows(data_list)
+
+# 打印成功写入文件的消息
+print(f"数据成功写入文件 {csv_file}！")

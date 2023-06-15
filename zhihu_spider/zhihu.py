@@ -22,12 +22,12 @@ headers = {
 # }
 
 # 根据个人需要,填写问题链接,之后根据返回next_url自动爬取
-url = 'https://www.zhihu.com/api/v4/questions/33870165/feeds?include=data%5B*%5D.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cattachment%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Ccreated_time%2Cupdated_time%2Creview_info%2Crelevant_info%2Cquestion%2Cexcerpt%2Cis_labeled%2Cpaid_info%2Cpaid_info_content%2Creaction_instruction%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp%2Cis_recognized%3Bdata%5B*%5D.mark_infos%5B*%5D.url%3Bdata%5B*%5D.author.follower_count%2Cvip_info%2Cbadge%5B*%5D.topics%3Bdata%5B*%5D.settings.table_of_content.enabled&offset=&limit=3&order=default&platform=desktop'
+url = 'https://www.zhihu.com/api/v4/questions/33870165/feeds?cursor=545d248f25074ac8b935a400faeb2785&include=data%5B%2A%5D.is_normal%2Cadmin_closed_comment%2Creward_info%2Cis_collapsed%2Cannotation_action%2Cannotation_detail%2Ccollapse_reason%2Cis_sticky%2Ccollapsed_by%2Csuggest_edit%2Ccomment_count%2Ccan_comment%2Ccontent%2Ceditable_content%2Cattachment%2Cvoteup_count%2Creshipment_settings%2Ccomment_permission%2Ccreated_time%2Cupdated_time%2Creview_info%2Crelevant_info%2Cquestion%2Cexcerpt%2Cis_labeled%2Cpaid_info%2Cpaid_info_content%2Creaction_instruction%2Crelationship.is_authorized%2Cis_author%2Cvoting%2Cis_thanked%2Cis_nothelp%3Bdata%5B%2A%5D.mark_infos%5B%2A%5D.url%3Bdata%5B%2A%5D.author.follower_count%2Cvip_info%2Cbadge%5B%2A%5D.topics%3Bdata%5B%2A%5D.settings.table_of_content.enabled&limit=5&offset=0&order=default&platform=desktop&session_id=1686637661864137036'
 is_end = False
 
-with open('output.csv', 'w', newline='', encoding='utf-8') as file:
+with open('protect_eyes.csv', 'w', newline='', encoding='utf-8') as file:
     writer = csv.writer(file)
-    writer.writerow(['name', 'like', 'content'])
+    writer.writerow(['name', 'gender', 'follower_count', 'headline', 'avatar_url', 'like', 'content'])
 
     while not is_end:
         response = requests.get(url, headers=headers, cookies={'Cookie': COOKIE}).json()
@@ -38,10 +38,14 @@ with open('output.csv', 'w', newline='', encoding='utf-8') as file:
             line = soup.get_text()
             name = data['target']['author']['name']
             voteup_count = data['target']['voteup_count']
-            writer.writerow([name, voteup_count, line])
-            print('name:{} -*- like:{} -*- content:{}'.format(name, voteup_count, line))
-            # collection.update_one({'name': name, 'like': voteup_count, 'content': line},
-            #                       {'$set': {'name': name, 'like': voteup_count, 'content': line}}, True)
+            avatar_url = data['target']['author']['avatar_url']
+            follower_count = data['target']['author']['follower_count']
+            gender = data['target']['author']['gender']
+            headline = data['target']['author']['headline']
+            writer.writerow([name, gender, follower_count, headline, avatar_url, voteup_count, line])
+            print(
+                f'name:{name} -*-gender:{gender}-*-follower:{follower_count}-*-headline:{headline}-*- like:{voteup_count} -*- content:{line}')
+
         url = response['paging']['next']
         time.sleep(2)
 
