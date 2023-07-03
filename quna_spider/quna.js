@@ -1,6 +1,6 @@
 {
                 key: "getRandomKey",
-                value: function(t) {
+                value: function (t) {
                     var n = "";
                     var r = ("" + t).substr(4);
                     r.split("").forEach(function(e) {

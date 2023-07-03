@@ -11,3 +11,8 @@ class DoubanSpiderItem(scrapy.Item):
     href = scrapy.Field()
     image = scrapy.Field()
     score = scrapy.Field()
+    all_des = scrapy.Field()
+    country = scrapy.Field()
+    user_name = scrapy.Field()
+    comment_time = scrapy.Field()
+    comment = scrapy.Field()

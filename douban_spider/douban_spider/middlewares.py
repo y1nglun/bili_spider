@@ -4,9 +4,27 @@
 # https://docs.scrapy.org/en/latest/topics/spider-middleware.html
 
 from scrapy import signals
-
+import random
+from scrapy.downloadermiddlewares.useragent import UserAgentMiddleware
+from scrapy.downloadermiddlewares.downloadtimeout import DownloadTimeoutMiddleware
 # useful for handling different item types with a single interface
 from itemadapter import is_item, ItemAdapter
+# 在middlewares.py文件中添加以下代码
+from scrapy import signals
+
+
+class RandomUserAgentMiddleware(UserAgentMiddleware):
+    def process_request(self, request, spider):
+        ua = random.choice(self.user_agent)
+        if ua:
+            request.headers.setdefault('User-Agent', ua)
+
+
+class RandomDelayMiddleware(DownloadTimeoutMiddleware):
+    def process_request(self, request, spider):
+        delay = random.uniform(0.5, 2.0)  # 设置延迟范围
+        self.download_timeout = delay
+        request.meta['download_timeout'] = delay
 
 
 class DoubanSpiderSpiderMiddleware:

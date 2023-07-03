@@ -13,7 +13,7 @@ class RankingSpider(scrapy.Spider):
                       "Chrome/111.0.0.0 Safari/537.36"
     }
 
-    start_url = 'https://shanghairanking.cn/_nuxt/static/1685689051/rankings/bcur/2023/payload.js'
+    start_url = 'https://shanghairanking.cn/_nuxt/static/1686903314/rankings/bcur/202211/payload.js'
 
     def start_requests(self):
         # 发起初始请求，指定回调函数为parse
@@ -21,7 +21,7 @@ class RankingSpider(scrapy.Spider):
 
     def parse(self, response):
         # 从响应中提取匹配的内容
-        pattern = r'__NUXT_JSONP__\("/rankings/bcur/2023", \((.*?)\)\);'
+        pattern = r'__NUXT_JSONP__\("/rankings/bcur/202211", \((.*?)\)\);'
         result = re.search(pattern, response.text)
         if result:
             matched_content = result.group(1)
